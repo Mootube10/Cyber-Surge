@@ -87,6 +87,12 @@
             color: lime;
             text-align: center;
         }
+        #attack-message {
+            color: red;
+            font-size: 20px;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -111,6 +117,8 @@
         <p><button class="button" onclick="buyReputation(30)">Boost Reputation (30 pts)</button></p>
         <p><button class="button" onclick="buyHarderQuestions(100)">Harder Questions Upgrade (100 pts)</button></p>
     </div>
+
+    <div id="attack-message"></div>
 
     <script>
         let score = 0;
@@ -175,13 +183,13 @@
                 { question: "Which element has the chemical symbol 'Fe'?", answer: "Iron", difficulty: 2 },
                 { question: "Who developed the theory of relativity?", answer: "Albert Einstein", difficulty: 3 },
                 { question: "What is the capital of Mongolia?", answer: "Ulaanbaatar", difficulty: 3 },
-                { question: "What is the fastest land animal?", answer: "African cheetah"},
-                { question: "What is the primary greenhouse gas responsible for global warming?", answer: "carbon dioxide"},
-                { question: "What is the hardest natural substance on Earth??", answer: "Diamond"},
-                { question: "What is the closest planet to the Sun?", answer: "Mercury" },
-                { question: "What part of the cell is responsible for producing energy?", answer: "mitochondria"},
-                { question: "What is the chemical formula for water?", answer: "H2O"},
-                { question: "What is the unit of electrical resistance?", answer: "ohm"}
+                { question: "What is the fastest land animal?", answer: "African cheetah", difficulty: 3},
+                { question: "What is the primary greenhouse gas responsible for global warming?", answer: "carbon dioxide",difficulty: 3},
+                { question: "What is the hardest natural substance on Earth??", answer: "Diamond",difficulty: 3},
+                { question: "What is the closest planet to the Sun?", answer: "Mercury",difficulty: 3 },
+                { question: "What part of the cell is responsible for producing energy?", answer: "mitochondria",difficulty: 3},
+                { question: "What is the chemical formula for water?", answer: "H2O",difficulty: 3},
+                { question: "What is the unit of electrical resistance?", answer: "ohm",difficulty: 3}
 
             ];
             const selectedQuestion = questions.filter(q => q.difficulty <= (harderQuestionsPurchased ? 3 : questionDifficulty))[Math.floor(Math.random() * questions.length)];
@@ -195,10 +203,9 @@
                 { question: "What comes next: 1, 2, 3, 4, ?", answer: "5", difficulty: 1 },
                 { question: "What comes next: A, B, C, D, ?", answer: "E", difficulty: 1 },
                 { question: "What comes next: Red, Green, Blue, ?", answer: "Yellow", difficulty: 2 },
-                { question: "What comes next: 2, 4, 6, 8, ?", answer: "12", difficulty: 2 },
+                { question: "What comes next: 2, 4, 6, 8, ?", answer: "10", difficulty: 2 },
                 { question: "What comes next: 5, 10, 15, 20, ?", answer: "25", difficulty: 3 },
-                { question: "What comes next: 1, 2, 3, 4, 5, 6, ?", answer: "7", difficulty: 3 },
-                { question: "What comes next: 12, 30, ? ", answer: "45", difficulty: 3}
+                { question: "What comes next: 1, 2, 3, 4, 5, 6, ?", answer: "7", difficulty: 3 }
             ];
             const selectedPattern = patterns.filter(p => p.difficulty <= (harderQuestionsPurchased ? 3 : questionDifficulty))[Math.floor(Math.random() * patterns.length)];
             currentQuestion = selectedPattern.question;
@@ -208,15 +215,30 @@
 
         function checkAnswer() {
             let userAnswer = document.getElementById("answer").value.trim();
+            let attackMessage = "";
+
             if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
                 score += 10 * scoreMultiplier;
                 reputation += 1;
+                attackMessage = "Attack Successful! New Attack";
             } else {
                 score -= 5; // Deduct points for wrong answer
+                attackMessage = "Attack Failed! Try Again";
             }
+
             document.getElementById("answer").value = ""; // Clear input
             updateUI();
+            showAttackMessage(attackMessage); // Show attack result
             generateQuestion(); // Next question
+        }
+
+        function showAttackMessage(message) {
+            let attackMessageElement = document.getElementById("attack-message");
+            attackMessageElement.innerText = message;
+            attackMessageElement.style.display = "block";
+            setTimeout(() => {
+                attackMessageElement.style.display = "none";
+            }, 2000); // Hide message after 2 seconds
         }
 
         function updateUI() {
@@ -237,7 +259,6 @@
                 score -= cost;
                 scoreMultiplier += 1;
                 updateUI();
-                alert("Upgrade successful! You now earn more points per hack.");
             } else {
                 alert("Not enough points!");
             }
@@ -246,9 +267,8 @@
         function buyReputation(cost) {
             if (score >= cost) {
                 score -= cost;
-                reputation += 10;
+                reputation += 5;
                 updateUI();
-                alert("Reputation boosted!");
             } else {
                 alert("Not enough points!");
             }
@@ -258,19 +278,18 @@
             if (score >= cost) {
                 score -= cost;
                 harderQuestionsPurchased = true;
-                alert("Harder Questions Upgrade activated! Questions are now more difficult.");
+                alert("Harder questions unlocked!");
+                updateUI();
             } else {
                 alert("Not enough points!");
             }
         }
 
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Error attempting full-screen mode: ${err.message}`);
-                });
-            } else {
+            if (document.fullscreenElement) {
                 document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen();
             }
         }
     </script>
