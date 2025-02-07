@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hack Rush</title>
+    <title>Cyber Surge</title>
     <style>
         body {
             background-color: black;
@@ -29,223 +29,250 @@
         #score {
             position: absolute;
             top: 10px;
+            left: 10px;
+            font-size: 20px;
+        }
+        #reputation {
+            position: absolute;
+            bottom: 10px;
             right: 10px;
             font-size: 20px;
         }
-        #terminal {
+        #store-btn {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            background: rgba(0, 0, 0, 0.8);
-            color: lime;
-            font-size: 14px;
-            padding: 10px;
-            white-space: pre-line;
-            overflow: hidden;
+            bottom: 10px;
+            left: 10px;
+            width: 100px;
+            height: 40px;
         }
-        #storeGUI {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+        #fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            text-align: center;
+        }
+        #store {
             display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        #storeContent {
-            background: #333;
-            padding: 20px;
+            position: fixed;
+            width: 300px;
+            height: 200px;
+            background: black;
             border: 2px solid lime;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            text-align: left;
+            z-index: 1000;
         }
-        #storeContent .button {
-            margin: 5px;
+        #store h2 {
+            margin-top: 0;
         }
-        #closeStore {
+        .close-btn {
             position: absolute;
             top: 5px;
-            right: 5px;
-            color: lime;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        #hackerReputationContainer {
-            position: absolute;
-            bottom: 10px;
             right: 10px;
-            width: 200px;
-            height: 20px;
-            border: 2px solid lime;
-            background-color: black;
-        }
-        #hackerReputationBar {
-            width: 0%;
-            height: 100%;
-            background-color: green;
-        }
-        #currentMission {
-            top: 40px;
-            left: 10px;
-            font-size: 14px;
-        }
-        #storeButton {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            background: lime;
-            color: black;
-            padding: 10px;
-            border: none;
             cursor: pointer;
+            color: red;
+        }
+        #answer {
+            width: 80%;
+            padding: 5px;
+            margin-top: 10px;
+            border: 1px solid lime;
+            background: black;
+            color: lime;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>Hack Rush</h1>
+    <h1>Cyber Surge</h1>
     <div id="score">Score: 0</div>
-    <div id="currentMission">Current Mission: None</div>
+    <div id="reputation">Reputation: 0</div>
     <div id="game">
         <p id="challenge">Press Start to Begin!</p>
-        <button class="button" onclick="startGame()">Start</button>
+        <button class="button" id="start-btn" onclick="startGame()">Start</button>
+        <br>
+        <input type="text" id="answer" placeholder="Type answer here">
+        <button class="button" id="submit-btn" onclick="checkAnswer()">Submit</button>
     </div>
-    <div id="terminal"></div>
-    
-    <!-- Store GUI -->
-    <div id="storeGUI">
-        <div id="storeContent">
-            <h2>Upgrade Store</h2>
-            <button class="button" onclick="upgradeSkills()">Upgrade Skills (50 Points)</button>
-            <button class="button" onclick="buyExtraTime()">Buy Extra Time (100 Points)</button>
-            <button class="button" onclick="unlockNewMission()">Unlock New Mission (200 Points)</button>
-            <button class="button" onclick="Updgradepoints()">Unlock New scoreMultiplier(150 points)</button>
-            <span id="closeStore" onclick="closeStore()">X</span>
-        </div>
-    </div>
+    <button class="button" id="store-btn" onclick="openStore()">Store</button>
+    <button class="button" id="fullscreen-btn" onclick="toggleFullScreen()">⛶</button>
 
-    <!-- Store Button -->
-    <button id="storeButton" onclick="openStore()">Store</button>
-
-    <!-- Hacker Reputation Bar -->
-    <div id="hackerReputationContainer">
-        <div id="hackerReputationBar"></div>
+    <!-- Store UI -->
+    <div id="store">
+        <span class="close-btn" onclick="closeStore()">X</span>
+        <h2>Hacker Upgrades</h2>
+        <p><button class="button" onclick="buyUpgrade(50)">Increase Points per Hack (50 pts)</button></p>
+        <p><button class="button" onclick="buyReputation(30)">Boost Reputation (30 pts)</button></p>
+        <p><button class="button" onclick="buyHarderQuestions(100)">Harder Questions Upgrade (100 pts)</button></p>
     </div>
 
     <script>
-        let challenges = [
-            { question: "What is 1 + 1?", answer: "2", points: 5 },
-            { question: "What is the capital of France?", answer: "Paris", points: 10 },
-            { question: "What color is the sky on a clear day?", answer: "Blue", points: 5 },
-            { question: "What is 5 + 5?", answer: "10", points: 5 },
-            { question: "What is the largest planet in our solar system?", answer: "Jupiter", points: 20 },
-            { question: "What is the chemical symbol for gold?", answer: "Au", points: 10 }
-        ];
-        let hackTargets = ["a smartphone", "a government database", "a bank server", "a smart fridge", "a security camera", "national security database"];
-        let hackTools = ["keylogger", "backdoor access", "brute-force attack", "phishing script", "malware injection", "Cyber Attack"];
-        let missions = ["Hack the bank server", "Access the government database", "Bypass the security camera", "Acses national Security override"];
         let score = 0;
         let reputation = 0;
         let scoreMultiplier = 1;
-        let currentMission = "None";
-        let terminal = document.getElementById("terminal");
+        let currentQuestion = "";
+        let correctAnswer = "";
+        let questionDifficulty = 1; // 1 = easy, 2 = medium, 3 = hard
+        let harderQuestionsPurchased = false;
+        const questionTypes = ['math', 'generalKnowledge', 'pattern'];
 
         function startGame() {
-            let currentChallenge = Math.floor(Math.random() * challenges.length);
-            let userAnswer = prompt(challenges[currentChallenge].question);
-            if (userAnswer && userAnswer.trim().toLowerCase() === challenges[currentChallenge].answer.toLowerCase()) {
-                let earnedPoints = challenges[currentChallenge].points * scoreMultiplier;
-                score += earnedPoints;
-                document.getElementById("score").innerText = "Score: " + score;
+            document.getElementById("start-btn").style.display = "none"; // Hide Start button
+            document.getElementById("challenge").innerText = "Initializing Hack...";
+            typeEffect("challenge", "ACCESS GRANTED... SYSTEM HACKING IN PROGRESS...", () => {
+                generateQuestion();
+            });
+        }
 
-                let target = hackTargets[Math.floor(Math.random() * hackTargets.length)];
-                let tool = hackTools[Math.floor(Math.random() * hackTools.length)];
-                document.getElementById("challenge").innerText = `Hack successful! You have placed a ${tool} on ${target}.`;
-                updateReputation(10); // Increase reputation for correct answer
-            } else {
-                score -= 5;  // Deduct points for wrong answer
-                document.getElementById("score").innerText = "Score: " + score;
-                document.getElementById("challenge").innerText = "Access Denied! Try Again...";
-                updateReputation(-5); // Decrease reputation for wrong answer
+        function typeEffect(elementId, text, callback) {
+            let i = 0;
+            let speed = 50;
+            let element = document.getElementById(elementId);
+            element.innerText = "";
+            function type() {
+                if (i < text.length) {
+                    element.innerText += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    callback();
+                }
             }
+            type();
+        }
 
-            // Randomly unlock missions
-            if (Math.random() < 0.3) {
-                let newMission = missions[Math.floor(Math.random() * missions.length)];
-                currentMission = newMission;
-                document.getElementById("currentMission").innerText = "Current Mission: " + newMission;
+        function generateQuestion() {
+            const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+            if (randomType === 'math') {
+                generateMathQuestion();
+            } else if (randomType === 'generalKnowledge') {
+                generateGeneralKnowledgeQuestion();
+            } else if (randomType === 'pattern') {
+                generatePatternQuestion();
             }
         }
 
-        function updateReputation(amount) {
-            reputation += amount;
-            if (reputation < 0) reputation = 0;  // Prevent negative reputation
-            if (reputation > 100) reputation = 100;  // Cap at 100 reputation
+        function generateMathQuestion() {
+            let num1 = Math.floor(Math.random() * (10 * questionDifficulty)) + 1;
+            let num2 = Math.floor(Math.random() * (10 * questionDifficulty)) + 1;
+            currentQuestion = `What is ${num1} + ${num2}?`;
+            correctAnswer = (num1 + num2).toString();
+            document.getElementById("challenge").innerText = currentQuestion;
+        }
 
-            // Update the reputation bar width and color based on reputation
-            let reputationBar = document.getElementById("hackerReputationBar");
-            reputationBar.style.width = reputation + "%";
-            reputationBar.style.backgroundColor = reputation >= 75 ? "green" : reputation >= 50 ? "yellow" : "red";
-            document.getElementById("hackerReputation").innerText = "Reputation: " + reputation;
+        function generateGeneralKnowledgeQuestion() {
+            const questions = [
+                { question: "Who is the CEO of Tesla?", answer: "Elon Musk", difficulty: 1 },
+                { question: "What is the capital of France?", answer: "Paris", difficulty: 1 },
+                { question: "What year did the Titanic sink?", answer: "1912", difficulty: 1 },
+                { question: "What is the largest planet in our solar system?", answer: "Jupiter", difficulty: 2 },
+                { question: "Which element has the chemical symbol 'Fe'?", answer: "Iron", difficulty: 2 },
+                { question: "Who developed the theory of relativity?", answer: "Albert Einstein", difficulty: 3 },
+                { question: "What is the capital of Mongolia?", answer: "Ulaanbaatar", difficulty: 3 },
+                { question: "What is the fastest land animal?", answer: "African cheetah"},
+                { question: "What is the primary greenhouse gas responsible for global warming?", answer: "carbon dioxide"},
+                { question: "What is the hardest natural substance on Earth??", answer: "Diamond"},
+                { question: "What is the closest planet to the Sun?", answer: "Mercury" },
+                { question: "What part of the cell is responsible for producing energy?", answer: "mitochondria"},
+                { question: "What is the chemical formula for water?", answer: "H2O"},
+                { question: "What is the unit of electrical resistance?", answer: "ohm"}
+
+            ];
+            const selectedQuestion = questions.filter(q => q.difficulty <= (harderQuestionsPurchased ? 3 : questionDifficulty))[Math.floor(Math.random() * questions.length)];
+            currentQuestion = selectedQuestion.question;
+            correctAnswer = selectedQuestion.answer;
+            document.getElementById("challenge").innerText = currentQuestion;
+        }
+
+        function generatePatternQuestion() {
+            const patterns = [
+                { question: "What comes next: 1, 2, 3, 4, ?", answer: "5", difficulty: 1 },
+                { question: "What comes next: A, B, C, D, ?", answer: "E", difficulty: 1 },
+                { question: "What comes next: Red, Green, Blue, ?", answer: "Yellow", difficulty: 2 },
+                { question: "What comes next: 2, 4, 6, 8, ?", answer: "12", difficulty: 2 },
+                { question: "What comes next: 5, 10, 15, 20, ?", answer: "25", difficulty: 3 },
+                { question: "What comes next: 1, 2, 3, 4, 5, 6, ?", answer: "7", difficulty: 3 },
+                { question: "What comes next: 12, 30, ? ", answer: "45", difficulty: 3}
+            ];
+            const selectedPattern = patterns.filter(p => p.difficulty <= (harderQuestionsPurchased ? 3 : questionDifficulty))[Math.floor(Math.random() * patterns.length)];
+            currentQuestion = selectedPattern.question;
+            correctAnswer = selectedPattern.answer;
+            document.getElementById("challenge").innerText = currentQuestion;
+        }
+
+        function checkAnswer() {
+            let userAnswer = document.getElementById("answer").value.trim();
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                score += 10 * scoreMultiplier;
+                reputation += 1;
+            } else {
+                score -= 5; // Deduct points for wrong answer
+            }
+            document.getElementById("answer").value = ""; // Clear input
+            updateUI();
+            generateQuestion(); // Next question
+        }
+
+        function updateUI() {
+            document.getElementById("score").innerText = "Score: " + score;
+            document.getElementById("reputation").innerText = "Reputation: " + reputation;
         }
 
         function openStore() {
-            document.getElementById("storeGUI").style.display = "flex";
+            document.getElementById("store").style.display = "block";
         }
 
         function closeStore() {
-            document.getElementById("storeGUI").style.display = "none";
+            document.getElementById("store").style.display = "none";
         }
 
-        function upgradeSkills() {
-            if (score >= 50) {
-                score -= 50;
+        function buyUpgrade(cost) {
+            if (score >= cost) {
+                score -= cost;
                 scoreMultiplier += 1;
-                document.getElementById("score").innerText = "Score: " + score;
-                alert("Skills upgraded! You now earn more points per hack.");
+                updateUI();
+                alert("Upgrade successful! You now earn more points per hack.");
             } else {
                 alert("Not enough points!");
             }
         }
 
-        function buyExtraTime() {
-            if (score >= 100) {
-                score -= 100;
-                alert("Extra time purchased! More time to complete challenges.");
+        function buyReputation(cost) {
+            if (score >= cost) {
+                score -= cost;
+                reputation += 10;
+                updateUI();
+                alert("Reputation boosted!");
             } else {
                 alert("Not enough points!");
             }
         }
 
-        function unlockNewMission() {
-            if (score >= 200) {
-                score -= 200;
-                currentMission = missions[Math.floor(Math.random() * missions.length)];
-                document.getElementById("currentMission").innerText = "Current Mission: " + currentMission;
-                alert("New mission unlocked!");
+        function buyHarderQuestions(cost) {
+            if (score >= cost) {
+                score -= cost;
+                harderQuestionsPurchased = true;
+                alert("Harder Questions Upgrade activated! Questions are now more difficult.");
             } else {
                 alert("Not enough points!");
             }
         }
 
-        function updateTerminal() {
-            let hackerText = [
-                "Initializing system breach...",
-                "Bypassing firewall...",
-                "Decrypting security protocol...",
-                "Accessing mainframe...",
-                "Extracting data packets...",
-                "Compiling exploit modules...",
-                "Executing shell access...",
-                "Uploading payload...",
-                "Mission complete!"
-            ];
-            terminal.innerText = hackerText[Math.floor(Math.random() * hackerText.length)];
-            setTimeout(updateTerminal, 1000);
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         }
-
-        updateTerminal();
     </script>
 </body>
 </html>
