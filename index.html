@@ -3,23 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</style>
-<style>
-    body {
-        background-color: black;
-        color: lime;
-        font-family: monospace;
-        text-align: center;
-        overflow: hidden;
-        background-image: url('https://www.securitymagazine.com/ext/resources/2023/01/23/hacker-gc04371cad_1920.jpg?1674482112'); /* Replace with a direct image URL */
-        background-size: cover;
-        background-position: center center;
-        background-attachment: fixed;
-    }
-</head>
-<body>
-
-    <title>Cyber Surge</title>
     <style>
         body {
             background-color: black;
@@ -27,12 +10,23 @@
             font-family: monospace;
             text-align: center;
             overflow: hidden;
+            background-image: url('https://www.securitymagazine.com/ext/resources/2023/01/23/hacker-gc04371cad_1920.jpg?1674482112'); /* Replace with a direct image URL */
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
         }
-        #game {
-            border: 2px solid lime;
-            display: inline-block;
-            padding: 20px;
-            margin-top: 50px;
+        #score {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 20px;
+        }
+        #menu-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 30px;
+            cursor: pointer;
         }
         .button {
             background: lime;
@@ -42,17 +36,11 @@
             border: none;
             cursor: pointer;
         }
-        #score {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 20px;
-        }
-        #reputation {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 20px;
+        #game {
+            border: 2px solid lime;
+            display: inline-block;
+            padding: 20px;
+            margin-top: 50px;
         }
         #store-btn {
             position: absolute;
@@ -109,12 +97,34 @@
             margin-top: 20px;
             display: none;
         }
+
+        /* Menu UI */
+        #menu-ui {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: black;
+            border: 2px solid lime;
+            padding: 20px;
+            text-align: center;
+            z-index: 1001;
+        }
+        #menu-ui .button {
+            width: 200px;
+        }
+        #close-menu-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            color: red;
+        }
     </style>
 </head>
 <body>
     <h1>Cyber Surge</h1>
-    <div id="score">Score: 0</div>
-    <div id="reputation">Reputation: 0</div>
     <div id="game">
         <p id="challenge">Press Start to Begin!</p>
         <button class="button" id="start-btn" onclick="startGame()">Start</button>
@@ -122,7 +132,17 @@
         <input type="text" id="answer" placeholder="Type answer here">
         <button class="button" id="submit-btn" onclick="checkAnswer()">Submit</button>
     </div>
+
+    <!-- Menu Button -->
+    <div id="menu-btn">☰</div>
+
+    <!-- Score -->
+    <div id="score">Score: 0</div>
+
+    <!-- Store Button -->
     <button class="button" id="store-btn" onclick="openStore()">Store</button>
+    
+    <!-- Fullscreen Button -->
     <button class="button" id="fullscreen-btn" onclick="toggleFullScreen()">⛶</button>
 
     <!-- Store UI -->
@@ -130,8 +150,15 @@
         <span class="close-btn" onclick="closeStore()">X</span>
         <h2>Hacker Upgrades</h2>
         <p><button class="button" onclick="buyUpgrade(50)">Increase Points per Hack (50 pts)</button></p>
-        <p><button class="button" onclick="buyReputation(30)">Boost Reputation (30 pts)</button></p>
         <p><button class="button" onclick="buyHarderQuestions(100)">Harder Questions Upgrade (100 pts)</button></p>
+    </div>
+
+    <!-- Menu UI -->
+    <div id="menu-ui">
+        <span id="close-menu-btn" onclick="closeMenu()">X</span>
+        <button class="button" onclick="openSupport()">Support</button>
+        <button class="button" disabled>Under Development</button>
+        <button class="button" disabled>Under Development</button>
     </div>
 
     <div id="attack-message"></div>
@@ -145,6 +172,21 @@
         let questionDifficulty = 1; // 1 = easy, 2 = medium, 3 = hard
         let harderQuestionsPurchased = false;
         const questionTypes = ['math', 'generalKnowledge', 'pattern'];
+
+        // Show the menu UI when the ☰ button is clicked
+        document.getElementById("menu-btn").onclick = function() {
+            document.getElementById("menu-ui").style.display = "block";
+        };
+
+        // Open the Discord support page
+        function openSupport() {
+            window.open("https://discord.gg/H4MHAKDzzT", "_blank"); // Replace with actual Discord support link
+        }
+
+        // Close the menu UI
+        function closeMenu() {
+            document.getElementById("menu-ui").style.display = "none";
+        }
 
         function startGame() {
             document.getElementById("start-btn").style.display = "none"; // Hide Start button
@@ -230,38 +272,42 @@
         }
 
         function checkAnswer() {
-            let userAnswer = document.getElementById("answer").value.trim();
-            let attackMessage = "";
-
-            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+            const playerAnswer = document.getElementById("answer").value.trim();
+            if (playerAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
                 score += 10 * scoreMultiplier;
-                reputation += 1;
-                attackMessage = "Attack Successful! New Attack";
+                updateUI();
+                generateQuestion();
             } else {
-                score -= 5; // Deduct points for wrong answer
-                attackMessage = "Attack Failed! Try Again";
+                displayAttackMessage("Incorrect! Try again!");
             }
-
-            document.getElementById("answer").value = ""; // Clear input
-            updateUI();
-            showAttackMessage(attackMessage); // Show attack result
-            generateQuestion(); // Next question
         }
 
-        function showAttackMessage(message) {
+        function updateUI() {
+            document.getElementById("score").innerText = `Score: ${score}`;
+        }
+
+        function displayAttackMessage(message) {
             let attackMessageElement = document.getElementById("attack-message");
             attackMessageElement.innerText = message;
             attackMessageElement.style.display = "block";
             setTimeout(() => {
                 attackMessageElement.style.display = "none";
-            }, 2000); // Hide message after 2 seconds
+            }, 2000);
         }
 
-        function updateUI() {
-            document.getElementById("score").innerText = "Score: " + score;
-            document.getElementById("reputation").innerText = "Reputation: " + reputation;
+        function toggleFullScreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            }
         }
 
+        // Store functionality
         function openStore() {
             document.getElementById("store").style.display = "block";
         }
@@ -273,20 +319,8 @@
         function buyUpgrade(cost) {
             if (score >= cost) {
                 score -= cost;
-                scoreMultiplier += 1;
+                scoreMultiplier *= 1.5; // Increase points multiplier
                 updateUI();
-            } else {
-                alert("Not enough points!");
-            }
-        }
-
-        function buyReputation(cost) {
-            if (score >= cost) {
-                score -= cost;
-                reputation += 5;
-                updateUI();
-            } else {
-                alert("Not enough points!");
             }
         }
 
@@ -294,21 +328,9 @@
             if (score >= cost) {
                 score -= cost;
                 harderQuestionsPurchased = true;
-                alert("Harder questions unlocked!");
-                updateUI();
-            } else {
-                alert("Not enough points!");
+                questionDifficulty = 3; // Unlock hardest questions
             }
         }
-
-        function toggleFullScreen() {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                document.documentElement.requestFullscreen();
-            }
-        }
-        
     </script>
 </body>
 </html>
