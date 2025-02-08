@@ -3,6 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</style>
+<style>
+    body {
+        background-color: black;
+        color: lime;
+        font-family: monospace;
+        text-align: center;
+        overflow: hidden;
+        background-image: url('https://www.securitymagazine.com/ext/resources/2023/01/23/hacker-gc04371cad_1920.jpg?1674482112'); /* Replace with a direct image URL */
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+    }
+</head>
+<body>
+
     <title>Cyber Surge</title>
     <style>
         body {
@@ -205,7 +221,7 @@
                 { question: "What comes next: Red, Green, Blue, ?", answer: "Yellow", difficulty: 2 },
                 { question: "What comes next: 2, 4, 6, 8, ?", answer: "10", difficulty: 2 },
                 { question: "What comes next: 5, 10, 15, 20, ?", answer: "25", difficulty: 3 },
-                { question: "What comes next: 1, 2, 3, 4, 5, 6, ?", answer: "7", difficulty: 3 }
+                { question: "What comes next: 1, 2, 3, 4, 5, 6, ?", answer: "13", difficulty: 3 }
             ];
             const selectedPattern = patterns.filter(p => p.difficulty <= (harderQuestionsPurchased ? 3 : questionDifficulty))[Math.floor(Math.random() * patterns.length)];
             currentQuestion = selectedPattern.question;
@@ -292,6 +308,7 @@
                 document.documentElement.requestFullscreen();
             }
         }
+        
     </script>
 </body>
 </html>
